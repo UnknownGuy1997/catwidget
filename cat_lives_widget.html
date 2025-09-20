@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Lives Widget</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1F1F1F;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            color: #fff;
+        }
+
+        .widget-container {
+            background: #1F1F1F;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .person-section {
+            margin-bottom: 16px;
+        }
+
+        .person-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .person-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e6b17a;
+        }
+
+        .cat-emoji {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .hearts-container {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .heart {
+            font-size: 18px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .heart:hover {
+            transform: scale(1.2);
+        }
+
+        .heart.alive {
+            color: #e6b17a;
+            filter: drop-shadow(0 0 4px rgba(230, 177, 122, 0.4));
+        }
+
+        .heart.dead {
+            color: #666;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            background: #4a4a4a;
+            border: 1px solid #666;
+            color: #e6b17a;
+            padding: 8px 16px;
+            margin: 0 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #555;
+        }
+
+        .edit-mode {
+            background: #e6b17a;
+            color: #2f2f2f;
+        }
+
+        .edit-mode:hover {
+            background: #d4a068;
+        }
+
+        .person-name {
+            color: #e6b17a;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+        }
+
+        .notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #ccc;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.4s ease;
+            max-width: 150px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .heal-btn {
+            background: linear-gradient(135deg, #e6b17a, #d4a068);
+            border: 1px solid #c99456;
+            color: #1F1F1F;
+            padding: 12px 24px;
+            font-weight: 600;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(230, 177, 122, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .heal-btn:hover {
+            background: linear-gradient(135deg, #d4a068, #c99456);
+            box-shadow: 0 4px 8px rgba(230, 177, 122, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .heal-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(230, 177, 122, 0.2);
+        }
+
+        .heal-btn:disabled {
+            background: #3a3a3a;
+            border-color: #4a4a4a;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .add-person {
+            background: #4a4a4a;
+            border: 1px dashed #666;
+            color: #999;
+            padding: 12px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .add-person:hover {
+            border-color: #e6b17a;
+            color: #e6b17a;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div id="people-container">
+            <div class="person-section" data-person="0">
+                <div class="person-header">
+                    <span class="cat-emoji">🐱</span>
+                    <span class="person-name">Патрик</span>
+                </div>
+                <div class="hearts-container">
+                    <span class="heart alive" data-life="0">🧡</span>
+                    <span class="heart alive" data-life="1">🧡</span>
+                    <span class="heart alive" data-life="2">🧡</span>
+                    <span class="heart alive" data-life="3">🧡</span>
+                    <span class="heart dead" data-life="4">🤍</span>
+                    <span class="heart dead" data-life="5">🤍</span>
+                    <span class="heart dead" data-life="6">🤍</span>
+                    <span class="heart dead" data-life="7">🤍</span>
+                    <span class="heart dead" data-life="8">🤍</span>
+                </div>
+            </div>
+
+            <div class="person-section" data-person="1">
+                <div class="person-header">
+                    <span class="cat-emoji">🐱</span>
+                    <span class="person-name">Оля</span>
+                </div>
+                <div class="hearts-container">
+                    <span class="heart alive" data-life="0">🧡</span>
+                    <span class="heart alive" data-life="1">🧡</span>
+                    <span class="heart alive" data-life="2">🧡</span>
+                    <span class="heart dead" data-life="3">🤍</span>
+                    <span class="heart dead" data-life="4">🤍</span>
+                    <span class="heart dead" data-life="5">🤍</span>
+                    <span class="heart dead" data-life="6">🤍</span>
+                    <span class="heart dead" data-life="7">🤍</span>
+                    <span class="heart dead" data-life="8">🤍</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification"></div>
+
+        <div class="controls">
+            <button class="btn heal-btn" onclick="healPatrik()">Вылечить котёнка</button>
+        </div>
+    </div>
+
+    <script>
+        let peopleData = [
+            { name: "Патрик", lives: 4 },
+            { name: "Оля", lives: 4 }
+        ];
+
+        let healingInterval = null;
+        let isHealing = false;
+
+        const funnyTexts = [
+            "Патрик упал с лестницы",
+            "Патрик поскользнулся на банановой кожуре",
+            "Патрик застрял в коробке",
+            "Патрик попытался поймать лазерную точку",
+            "Патрик свалился с подоконника",
+            "Патрик запутался в шторах"
+        ];
+
+        function showNotification(text) {
+            const notification = document.getElementById('notification');
+            notification.textContent = text;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleLife(personIndex, lifeIndex) {
+            if (isHealing && personIndex === 0) return; // Can't manually change Patrik's health during healing
+            
+            const person = peopleData[personIndex];
+            if (!person) return;
+            
+            if (lifeIndex < person.lives) {
+                // Removing a life
+                person.lives = lifeIndex;
+            } else {
+                // Adding a life
+                person.lives = lifeIndex + 1;
+            }
+            
+            updateHearts(personIndex);
+            saveToStorage();
+        }
+
+        function updateHearts(personIndex) {
+            const section = document.querySelector(`[data-person="${personIndex}"]`);
+            const hearts = section.querySelectorAll('.heart');
+            const lives = peopleData[personIndex].lives;
+            
+            hearts.forEach((heart, index) => {
+                if (index < lives) {
+                    heart.className = 'heart alive';
+                    heart.textContent = '🧡';
+                } else {
+                    heart.className = 'heart dead';
+                    heart.textContent = '🤍';
+                }
+            });
+        }
+
+        function healPatrik() {
+            if (isHealing) return;
+            
+            isHealing = true;
+            const healBtn = document.querySelector('.heal-btn');
+            healBtn.disabled = true;
+            healBtn.textContent = 'Лечение...';
+            
+            // Set Patrik to max health
+            peopleData[0].lives = 9;
+            updateHearts(0);
+            saveToStorage();
+            
+            showNotification("Патрик полностью вылечен! 🌟");
+            
+            // Start losing health every 2 seconds until reaching 4
+            healingInterval = setInterval(() => {
+                if (peopleData[0].lives > 4) {
+                    peopleData[0].lives--;
+                    updateHearts(0);
+                    saveToStorage();
+                    
+                    // Only show notification if health actually decreased
+                    if (peopleData[0].lives >= 4) {
+                        const randomText = funnyTexts[Math.floor(Math.random() * funnyTexts.length)];
+                        showNotification(randomText + " 😿");
+                    }
+                    
+                    // Check if we've reached 4 lives
+                    if (peopleData[0].lives === 4) {
+                        clearInterval(healingInterval);
+                        isHealing = false;
+                        healBtn.disabled = false;
+                        healBtn.textContent = 'Вылечить котёнка';
+                        showNotification("Патрик стабилизировался на 4 жизнях 😌");
+                    }
+                } else {
+                    // Safety check - stop if somehow we went below 4
+                    clearInterval(healingInterval);
+                    isHealing = false;
+                    healBtn.disabled = false;
+                    healBtn.textContent = 'Вылечить котёнка';
+                }
+            }, 2000);
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('catLivesData', JSON.stringify(peopleData));
+        }
+
+        function loadFromStorage() {
+            const stored = localStorage.getItem('catLivesData');
+            if (stored) {
+                const loadedData = JSON.parse(stored);
+                // Only update lives, keep the Russian names
+                peopleData[0].lives = loadedData[0]?.lives || 4;
+                peopleData[1].lives = loadedData[1]?.lives || 3;
+                
+                updateHearts(0);
+                updateHearts(1);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            
+            // Add click handlers to hearts
+            document.querySelectorAll('.heart').forEach((heart) => {
+                const section = heart.closest('.person-section');
+                const personIndex = parseInt(section.getAttribute('data-person'));
+                const lifeIndex = parseInt(heart.getAttribute('data-life'));
+                
+                heart.onclick = () => toggleLife(personIndex, lifeIndex);
+            });
+        });
+
+        // Clear interval when page is closed
+        window.addEventListener('beforeunload', () => {
+            if (healingInterval) {
+                clearInterval(healingInterval);
+            }
+        });
+    </script>
+</body>
+</html>
